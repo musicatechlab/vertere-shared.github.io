@@ -85,8 +85,8 @@ export const DEFAULT_INSTRUMENT_FOR_ROLE: Record<PartRole, InstrumentChoice> = {
   MezzoSoprano: 'clarinet',
   Alto: 'clarinet',
   Tenor: 'clarinet',
-  Baritone: 'clarinet',
-  Bass: 'clarinet',
+  Baritone: 'bassoon',
+  Bass: 'bassoon',
   Piano: 'piano',
   Percussion: 'woodblock',
   Excluded: 'piano', // 使われないが型を満たすため
@@ -133,6 +133,7 @@ export const SOUNDFONT_BASE_URL = `${import.meta.env.BASE_URL}sounds/`;
 /** 楽器名 → SoundFont ディレクトリ名 */
 export const SOUNDFONT_INSTRUMENT_NAMES: Record<InstrumentChoice, string> = {
   clarinet: 'clarinet',
+  bassoon: 'bassoon',
   piano: 'piano',
   woodblock: 'woodblock',
 };

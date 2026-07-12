@@ -1,0 +1,30 @@
+{
+  "name": "vertere",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "合唱練習用音源自動生成ツール — MIDIからパート別MP3を生成",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "check:prod": "node scripts/check-production.mjs",
+    "postinstall": "node scripts/patch-tonejs-midi.cjs && patch-package"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "vitest": "^3.2.1"
+  },
+  "dependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "@tonejs/midi": "^2.0.28",
+    "jszip": "^3.10.1",
+    "patch-package": "^8.0.1",
+    "tone": "^15.0.4"
+  }
+}

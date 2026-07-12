@@ -1,0 +1,83 @@
+/* ============================================
+   Design Tokens — Single Source of Truth
+   MusicaTechLab デザインシステム "Score" に準拠。
+   正: リポジトリルート（musicatechlab_website）の design/tokens.css
+   変更する場合は docs/DESIGN_SYSTEM.md と両方を確認すること。
+
+   フォント読み込みは index.html 側で行う（Montserrat + Zen Kaku Gothic New）。
+   ============================================ */
+
+:root {
+  /* ---- Color: Paper（紙）---- */
+  --mtl-paper: #fbfbf9;
+  --mtl-paper-dim: #f3f3ef;
+  --mtl-ink: #1a1a1a;
+  --mtl-ink-2: #4a4a48;
+  --mtl-ink-3: #8b8b87;
+  --mtl-line: #dcdcd6;
+  --mtl-line-soft: #eaeae5;
+  --mtl-accent: #a93b2a; /* 朱 — 実行ボタン・進捗・エラーなど要所のみ */
+  --mtl-accent-deep: #8a2f21;
+  --mtl-accent-subtle: rgba(169, 59, 42, 0.08);
+  --mtl-success: #3d6b45;
+
+  /*
+   * パート表示色（core/constants.ts の PART_COLORS が参照する CSS 変数名）。
+   * 彩色は朱の濃淡＋墨の階調のみで区別する（青紫グラデーション等は使わない）。
+   */
+  --color-part-soprano: var(--mtl-accent);
+  --color-part-mezzosoprano: var(--mtl-accent-deep);
+  --color-part-alto: #6b4a3f;
+  --color-part-tenor: var(--mtl-ink);
+  --color-part-baritone: var(--mtl-ink-2);
+  --color-part-bass: #3a3a38;
+  --color-part-piano: var(--mtl-accent-deep);
+  --color-part-percussion: var(--mtl-ink-2);
+
+  /* ---- Typography ---- */
+  --mtl-font-sans: 'Montserrat', 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --mtl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Type scale — 強弱記号 (dynamics) 由来 */
+  --mtl-text-pp: 0.75rem; /* 12px caption */
+  --mtl-text-p: 0.875rem; /* 14px meta/label */
+  --mtl-text-mp: 1rem; /* 16px body */
+  --mtl-text-mf: 1.25rem; /* 20px lead/h4 */
+  --mtl-text-f: 1.5625rem; /* 25px h3 */
+  --mtl-text-ff: 2rem; /* 32px h2 */
+  --mtl-text-fff: 2.5rem; /* 40px h1 */
+
+  --mtl-leading-body: 1.8;
+  --mtl-leading-heading: 1.3;
+  --mtl-tracking-jp: 0.02em;
+  --mtl-tracking-caps: 0.08em;
+
+  /* ---- Spacing (8px base) ---- */
+  --mtl-space-half: 4px;
+  --mtl-space-1: 8px;
+  --mtl-space-2: 16px;
+  --mtl-space-3: 24px;
+  --mtl-space-4: 32px;
+  --mtl-space-6: 48px;
+  --mtl-space-8: 64px;
+  --mtl-space-12: 96px;
+
+  /* ---- Layout ---- */
+  --mtl-container: 1120px;
+
+  /* ---- Shape & Elevation ---- */
+  --mtl-radius: 2px;
+  --mtl-shadow: 0 1px 2px rgba(26, 26, 26, 0.05); /* これが上限 */
+
+  /* ---- Motion ---- */
+  --mtl-dur-s: 160ms;
+  --mtl-dur-m: 240ms;
+  --mtl-ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mtl-dur-s: 0ms;
+    --mtl-dur-m: 0ms;
+  }
+}

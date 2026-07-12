@@ -1,0 +1,20 @@
+diff --git a/node_modules/midi-file/lib/midi-parser.js b/node_modules/midi-file/lib/midi-parser.js
+index 50ed069..76e9214 100644
+--- a/node_modules/midi-file/lib/midi-parser.js
++++ b/node_modules/midi-file/lib/midi-parser.js
+@@ -176,6 +176,15 @@ function parseTrack(data) {
+         var length = p.readVarInt()
+         event.data = p.readBytes(length)
+         return event
++      } else if (eventTypeByte >= 0xf1 && eventTypeByte <= 0xf6) {
++        event.type = 'systemCommon'
++        event.status = eventTypeByte
++        if (eventTypeByte === 0xf1 || eventTypeByte === 0xf3) {
++          event.data = p.readBytes(1)
++        } else if (eventTypeByte === 0xf2) {
++          event.data = p.readBytes(2)
++        }
++        return event
+       } else {
+         throw "Unrecognised MIDI event type byte: " + eventTypeByte
+       }

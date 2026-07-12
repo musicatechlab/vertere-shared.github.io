@@ -58,6 +58,13 @@ function getSampleUrls(instrument: InstrumentChoice): Record<string, string> {
         'A6': `${baseUrl}A6.mp3`,
         'C7': `${baseUrl}C7.mp3`,
       };
+    case 'bassoon':
+      return {
+        'C2': `${baseUrl}C2.mp3`,
+        'C3': `${baseUrl}C3.mp3`,
+        'C4': `${baseUrl}C4.mp3`,
+        'C5': `${baseUrl}C5.mp3`,
+      };
     case 'clarinet':
       return {
         'D1': `${baseUrl}D1.mp3`,
