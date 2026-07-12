@@ -138,6 +138,10 @@ describe('renderPartAudio', () => {
       { noteName: 'D4', duration: 0.5, time: 2, velocity: 0.7 },
     ]);
     expect(Object.keys(toneMockState.samplerUrls[0])).toContain('D3');
+    // クラリネットは実音域 D3 以上のみ。低音バスは Sampler のピッチシフトで鳴らす。
+    // 人工的な低音サンプル(D1/D2)は使わない（アタックが引き伸ばされ遅延の原因になるため）。
+    expect(Object.keys(toneMockState.samplerUrls[0])).not.toContain('D1');
+    expect(Object.keys(toneMockState.samplerUrls[0])).not.toContain('D2');
     expect(Object.keys(toneMockState.samplerUrls[1])).toContain('A0');
   });
 

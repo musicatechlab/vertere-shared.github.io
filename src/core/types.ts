@@ -67,7 +67,7 @@ export type VoiceRole = Exclude<PartRole, 'Piano' | 'Percussion' | 'Excluded'>;
 export type ChoirType = 'mixed' | 'men3' | 'men4' | 'women3' | 'women4';
 
 /** 楽器選択肢 */
-export type InstrumentChoice = 'clarinet' | 'bassoon' | 'piano' | 'woodblock';
+export type InstrumentChoice = 'clarinet' | 'piano' | 'woodblock';
 
 /** 1トラックのユーザー設定 */
 export interface TrackConfig {

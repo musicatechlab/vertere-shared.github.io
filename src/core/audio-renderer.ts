@@ -58,17 +58,11 @@ function getSampleUrls(instrument: InstrumentChoice): Record<string, string> {
         'A6': `${baseUrl}A6.mp3`,
         'C7': `${baseUrl}C7.mp3`,
       };
-    case 'bassoon':
-      return {
-        'C2': `${baseUrl}C2.mp3`,
-        'C3': `${baseUrl}C3.mp3`,
-        'C4': `${baseUrl}C4.mp3`,
-        'C5': `${baseUrl}C5.mp3`,
-      };
     case 'clarinet':
+      // クラリネットの実音域は D3 以上。それ未満のバス音は Tone.Sampler が
+      // 実サンプルをリアルタイムにピッチシフトして鳴らす（人工的な低音サンプル・
+      // 手動トリムは廃止）。
       return {
-        'D1': `${baseUrl}D1.mp3`,
-        'D2': `${baseUrl}D2.mp3`,
         'D3': `${baseUrl}D3.mp3`,
         'D4': `${baseUrl}D4.mp3`,
         'D5': `${baseUrl}D5.mp3`,

@@ -133,7 +133,6 @@ export const SOUNDFONT_BASE_URL = `${import.meta.env.BASE_URL}sounds/`;
 /** 楽器名 → SoundFont ディレクトリ名 */
 export const SOUNDFONT_INSTRUMENT_NAMES: Record<InstrumentChoice, string> = {
   clarinet: 'clarinet',
-  bassoon: 'bassoon',
   piano: 'piano',
   woodblock: 'woodblock',
 };
