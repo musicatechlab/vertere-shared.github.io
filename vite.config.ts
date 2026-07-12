@@ -2,8 +2,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
+// カスタムドメイン（vertere.musicatechlab.com、public/CNAME で設定）配信のため
+// 常にルート直下 '/' から配信する。GitHub Pages のプロジェクトサイト用サブパスは使わない。
 export default defineConfig(() => ({
-  base: '/vertere-shared.github.io/',
+  base: '/',
 
   resolve: {
     alias: {
