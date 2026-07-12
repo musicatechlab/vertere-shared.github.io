@@ -130,6 +130,7 @@ export function renderAppShell(root: HTMLDivElement): void {
       </div>
       <p>${t('app.footer1')}</p>
       <p>${t('app.footer2')}</p>
+      <p class="footer-license">${t('app.footer3')}</p>
     </footer>
   `;
 }

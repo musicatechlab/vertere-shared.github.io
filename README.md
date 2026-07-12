@@ -44,7 +44,10 @@ npm run check:prod # 公開URLヘルスチェック
 
 ## ライセンス
 
-MIT
+ソースコード: MIT License
+
+### サードパーティリソース
+- 楽器音源サンプル: [FluidR3_GM](https://github.com/gleitz/midi-js-soundfonts) by Frank Wen (Creative Commons Attribution 3.0 License)
 
 ## 音量とミックスの仕様
 
