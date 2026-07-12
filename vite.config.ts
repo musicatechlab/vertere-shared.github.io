@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig(() => ({
-  base: '/vertere-shared/',
+  base: '/vertere-shared.github.io/',
 
   resolve: {
     alias: {
