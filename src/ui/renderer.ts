@@ -129,6 +129,7 @@ export function renderAppShell(root: HTMLDivElement): void {
         </select>
       </div>
       <p>${t('app.footer1')}</p>
+      <p class="footer-etymology">${t('app.footer.etymology')}</p>
       <p>${t('app.footer2')}</p>
       <p class="footer-license">${t('app.footer3')}</p>
     </footer>

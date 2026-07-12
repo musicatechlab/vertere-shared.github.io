@@ -575,7 +575,8 @@ body {
   margin-top: var(--mtl-space-1);
 }
 
-.footer-license {
+.footer-license,
+.footer-etymology {
   margin-top: var(--mtl-space-2) !important;
   font-size: 0.85em;
   opacity: 0.7;
