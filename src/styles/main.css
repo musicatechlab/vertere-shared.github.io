@@ -558,6 +558,10 @@ body {
 
 /* === Footer === */
 
+.footer__lang {
+  margin-bottom: var(--mtl-space-4);
+}
+
 .footer {
   text-align: center;
   padding: var(--mtl-space-8) 0 var(--mtl-space-4);
@@ -725,4 +729,18 @@ body {
   font-size: 0.75em;
   font-weight: 700;
   vertical-align: middle;
+}
+
+.select--small {
+  width: auto;
+  min-width: 0;
+  padding: var(--mtl-space-1) var(--mtl-space-4) var(--mtl-space-1) var(--mtl-space-2);
+  font-size: var(--mtl-text-pp);
+  background-color: transparent;
+  border: none;
+  color: var(--mtl-ink-3);
+}
+
+.select--small:hover {
+  color: var(--mtl-ink-2);
 }
