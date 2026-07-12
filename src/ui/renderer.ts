@@ -43,7 +43,7 @@ function renderChoirTypeSelector(state: AppState): string {
 export function renderAppShell(root: HTMLDivElement): void {
   root.innerHTML = `
     <header class="header">
-      <h1 class="header__title">Vertere（うぇるてーれ）</h1>
+      <h1 class="header__title">Vertere<span class="header__title-ja">（うぇるてーれ）</span></h1>
       <p class="header__subtitle">MIDI to MP3 Converter — 合唱練習用音源自動生成ツール</p>
     </header>
 

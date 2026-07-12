@@ -720,3 +720,9 @@ body {
   margin-top: var(--mtl-space-3);
   line-height: 1.5;
 }
+
+.header__title-ja {
+  font-size: 0.75em;
+  font-weight: 500;
+  vertical-align: middle;
+}
