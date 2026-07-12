@@ -57,6 +57,17 @@ export const MP3_CHUNK_SIZE = 1152;
  */
 export const NORMALIZE_TARGET_PEAK = 0.89;
 
+/**
+ * クラリネット・サンプルのアタック整形パラメータ。
+ * gleitz のクラリネット低音サンプル(D3/D4)は立ち上がりが遅く(→70%で約100ms)、
+ * さらにバス音はピッチダウンで引き伸ばされて「遅れて」聞こえる。
+ * 読み込み時に各サンプルの先頭の緩慢な立ち上がり部分を、ピーク比 THRESHOLD に
+ * 達する位置まで切り詰め、クリック防止に FADE 秒の短いフェードインを掛けて、
+ * 音域によらず高音と同程度のアタックに揃える（元ファイルは無改変）。
+ */
+export const CLARINET_ATTACK_TRIM_THRESHOLD = 0.35;
+export const CLARINET_ATTACK_FADE_SEC = 0.01;
+
 // === パート定義 ===
 
 /** 利用可能なパートロール一覧（UIセレクトのoptions） */

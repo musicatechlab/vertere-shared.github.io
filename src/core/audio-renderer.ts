@@ -8,7 +8,12 @@
 
 import * as Tone from 'tone';
 import type { ParsedMidi, ParsedNote, ParsedTrack, TrackConfig } from './types.ts';
-import { SOUNDFONT_BASE_URL, SOUNDFONT_INSTRUMENT_NAMES } from './constants.ts';
+import {
+  SOUNDFONT_BASE_URL,
+  SOUNDFONT_INSTRUMENT_NAMES,
+  CLARINET_ATTACK_TRIM_THRESHOLD,
+  CLARINET_ATTACK_FADE_SEC,
+} from './constants.ts';
 import type { InstrumentChoice } from './types.ts';
 
 // ノート番号 → 音名変換テーブル（Tone.js形式: "C4", "A#3" など）
@@ -77,6 +82,88 @@ function getSampleUrls(instrument: InstrumentChoice): Record<string, string> {
         'C6': `${baseUrl}C6.mp3`,
       };
   }
+}
+
+/**
+ * サンプルの先頭にある緩慢な立ち上がり部分を切り詰める開始位置を求める（純粋関数）。
+ * 全体のピークに対し thresholdRatio に最初に到達するサンプル位置を返す。
+ * 立ち上がりが速い（すでに閾値以上で始まる）場合や無音の場合は 0。
+ */
+export function findAttackTrimStart(data: Float32Array, thresholdRatio: number): number {
+  let peak = 0;
+  for (let i = 0; i < data.length; i++) {
+    const abs = Math.abs(data[i]);
+    if (abs > peak) peak = abs;
+  }
+  if (peak === 0 || thresholdRatio <= 0) return 0;
+  const threshold = peak * thresholdRatio;
+  for (let i = 0; i < data.length; i++) {
+    if (Math.abs(data[i]) >= threshold) return i;
+  }
+  return 0;
+}
+
+/**
+ * AudioBuffer の先頭の緩慢な立ち上がりを切り詰め、クリック防止の短いフェードインを掛けた
+ * 新しい AudioBuffer を返す。全チャンネル共通の開始位置（最も早く閾値に達した位置）で切る。
+ */
+function trimAttack(
+  ctx: BaseAudioContext,
+  buffer: AudioBuffer,
+  thresholdRatio: number,
+  fadeSec: number
+): AudioBuffer {
+  let start = buffer.length;
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    start = Math.min(start, findAttackTrimStart(buffer.getChannelData(c), thresholdRatio));
+  }
+  if (start <= 0) return buffer;
+
+  const newLength = buffer.length - start;
+  const fade = Math.min(Math.floor(fadeSec * buffer.sampleRate), newLength);
+  const out = ctx.createBuffer(buffer.numberOfChannels, newLength, buffer.sampleRate);
+  for (let c = 0; c < buffer.numberOfChannels; c++) {
+    const src = buffer.getChannelData(c);
+    const dst = out.getChannelData(c);
+    for (let i = 0; i < newLength; i++) {
+      const gain = i < fade ? i / fade : 1;
+      dst[i] = src[start + i] * gain;
+    }
+  }
+  return out;
+}
+
+/**
+ * クラリネットのサンプルを読み込み、アタックを整形したバッファ群を返す（プロセス内で一度だけ）。
+ * Web Audio が使えない環境（Node のテスト等）では URL 文字列辞書へフォールバックする。
+ */
+let clarinetSampleMapPromise: Promise<Record<string, string | AudioBuffer>> | null = null;
+function getClarinetSampleMap(): Promise<Record<string, string | AudioBuffer>> {
+  if (typeof OfflineAudioContext === 'undefined' || typeof fetch === 'undefined') {
+    return Promise.resolve(getSampleUrls('clarinet'));
+  }
+  if (!clarinetSampleMapPromise) {
+    clarinetSampleMapPromise = (async () => {
+      const decodeCtx = new OfflineAudioContext(1, 1, 44100);
+      const urls = getSampleUrls('clarinet');
+      const entries = await Promise.all(
+        Object.entries(urls).map(async ([note, url]) => {
+          const res = await fetch(url);
+          const raw = await res.arrayBuffer();
+          const decoded = await decodeCtx.decodeAudioData(raw);
+          const trimmed = trimAttack(
+            decodeCtx,
+            decoded,
+            CLARINET_ATTACK_TRIM_THRESHOLD,
+            CLARINET_ATTACK_FADE_SEC
+          );
+          return [note, trimmed] as const;
+        })
+      );
+      return Object.fromEntries(entries);
+    })();
+  }
+  return clarinetSampleMapPromise;
 }
 
 /** High Wood Block (MIDI 76) を割り当てる音程 */
@@ -153,6 +240,10 @@ async function renderWithGains(
   // 末尾に0.5秒の余白を追加（最終ノートのリリースのため）
   const renderDuration = parsedMidi.durationSeconds + 0.5;
 
+  // クラリネットを使うトラックがあれば、アタック整形済みサンプルを先に用意する
+  const hasClarinet = [...configMap.values()].some((c) => c.instrument === 'clarinet');
+  const clarinetSampleMap = hasClarinet ? await getClarinetSampleMap() : null;
+
   const toneBuffer = await Tone.Offline(async () => {
     const samplers: Array<{
       sampler: Tone.Sampler;
@@ -169,7 +260,10 @@ async function renderWithGains(
       const gainValue = gainResolver(track, config);
 
       const gainNode = new Tone.Gain(gainValue).toDestination();
-      const sampleUrls = getSampleUrls(config.instrument);
+      const sampleUrls =
+        config.instrument === 'clarinet' && clarinetSampleMap
+          ? clarinetSampleMap
+          : getSampleUrls(config.instrument);
 
       const sampler = new Tone.Sampler({
         urls: sampleUrls,

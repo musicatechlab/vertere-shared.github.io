@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ParsedMidi, TrackConfig } from './types.ts';
-import { renderAllPartsAudio, renderPartAudio } from './audio-renderer.ts';
+import { findAttackTrimStart, renderAllPartsAudio, renderPartAudio } from './audio-renderer.ts';
 
 const toneMockState = vi.hoisted(() => ({
   loadedCalls: 0,
@@ -103,6 +103,30 @@ function makeParsedMidi(): ParsedMidi {
     ],
   };
 }
+
+describe('findAttackTrimStart', () => {
+  it('returns the first index reaching the threshold ratio of the peak', () => {
+    // peak = 1.0（末尾）、閾値0.5 → 0.6 が最初に0.5以上になる index 3
+    const data = new Float32Array([0.05, 0.1, 0.3, 0.6, 0.9, 1.0, 0.8]);
+    expect(findAttackTrimStart(data, 0.5)).toBe(3);
+  });
+
+  it('returns 0 when the signal already starts above threshold', () => {
+    const data = new Float32Array([1.0, 0.9, 0.2]);
+    expect(findAttackTrimStart(data, 0.5)).toBe(0);
+  });
+
+  it('returns 0 for silence or non-positive threshold', () => {
+    expect(findAttackTrimStart(new Float32Array([0, 0, 0]), 0.5)).toBe(0);
+    expect(findAttackTrimStart(new Float32Array([0.1, 0.5]), 0)).toBe(0);
+  });
+
+  it('detects the threshold crossing on negative peaks too', () => {
+    const data = new Float32Array([-0.1, -0.2, -0.8, -1.0]);
+    // peak=1.0, 閾値0.7 → -0.8 の index 2
+    expect(findAttackTrimStart(data, 0.7)).toBe(2);
+  });
+});
 
 describe('renderPartAudio', () => {
   beforeEach(() => {
