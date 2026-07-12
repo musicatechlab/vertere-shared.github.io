@@ -85,8 +85,8 @@ export const DEFAULT_INSTRUMENT_FOR_ROLE: Record<PartRole, InstrumentChoice> = {
   MezzoSoprano: 'clarinet',
   Alto: 'clarinet',
   Tenor: 'clarinet',
-  Baritone: 'bassoon',
-  Bass: 'bassoon',
+  Baritone: 'clarinet',
+  Bass: 'clarinet',
   Piano: 'piano',
   Percussion: 'woodblock',
   Excluded: 'piano', // 使われないが型を満たすため
