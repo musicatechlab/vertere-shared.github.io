@@ -133,8 +133,12 @@ export interface GeneratedPart {
 
 // === アプリケーション状態 ===
 
+import type { Language } from './i18n.ts';
+
 /** アプリケーション全体の状態 */
 export interface AppState {
+  /** 現在のUI言語 */
+  language: Language;
   /** 解析済みMIDIデータ */
   parsedMidi: ParsedMidi | null;
   /** 合唱編成の種別（自動割り当ての基準） */

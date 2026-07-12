@@ -1,3 +1,4 @@
+import { t } from '../../core/i18n.ts';
 import { sanitizeFileName } from '../../core/file-name.ts';
 import type { AppState, GeneratedPart } from '../../core/types.ts';
 import { addGeneratedPart, resetGeneration, setProgress } from '../../state/app-state.ts';
@@ -108,7 +109,7 @@ export function setupDownloadButton(options: DownloadButtonOptions): void {
 
           const latestState = getState();
           if (!latestState.parsedMidi) {
-            throw new Error('MIDIデータが見つかりません');
+            throw new Error(t('error.noMidi'));
           }
 
           const audioBuffer = mode === 'all'
@@ -181,7 +182,7 @@ export function setupDownloadButton(options: DownloadButtonOptions): void {
         downloadBlob(zipBlob, latestZipFileName);
         updateState((state) => setProgress(state, {
           phase: 'done',
-          currentPartName: '完了',
+          currentPartName: t('phase.done'),
           currentPartIndex: parts.length - 1,
           totalParts: parts.length,
           partProgress: 100,

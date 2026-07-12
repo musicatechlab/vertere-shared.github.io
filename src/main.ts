@@ -4,7 +4,9 @@
  */
 
 import './styles/main.css';
-import { createInitialAppState, resetGeneration, setBackgroundVolume, setChoirType, setParsedMidi, setTrackPartName, updateTrackConfig } from './state/app-state.ts';
+import { createInitialAppState, resetGeneration, setBackgroundVolume, setChoirType, setLanguage as setAppStateLanguage, setParsedMidi, setTrackPartName, updateTrackConfig } from './state/app-state.ts';
+import { setLanguage, t, getLanguage } from './core/i18n.ts';
+import type { Language } from './core/i18n.ts';
 import type { AppState } from './core/types.ts';
 import { setupDownloadButton } from './ui/components/download-button.ts';
 import { setupFileUpload } from './ui/components/file-upload.ts';
@@ -16,8 +18,10 @@ function initApp(): void {
   const app = document.querySelector<HTMLDivElement>('#app');
   if (!app) throw new Error('Root element #app not found');
 
+  const browserLang = navigator.language.startsWith('ja') ? 'ja' : 'en';
+  setLanguage(browserLang);
+  let state = createInitialAppState(browserLang);
   renderAppShell(app);
-  let state = createInitialAppState();
   const getState = (): AppState => state;
 
   const render = (): void => {
@@ -27,58 +31,71 @@ function initApp(): void {
     state = updater(state);
     render();
   };
+
+  app.addEventListener('change', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('js-lang-select')) {
+      const newLang = (target as HTMLSelectElement).value as Language;
+      setLanguage(newLang);
+      renderAppShell(app); // Re-render shell strings
+      // Re-bind listeners for the newly created shell DOM
+      bindShellListeners();
+      updateState((current) => setAppStateLanguage(current, newLang));
+    }
+  });
   // トラック表を再構築せず、状態更新とコントロール表示のみ行う（入力中のフォーカス維持）
   const updateStateControlsOnly = (updater: (current: AppState) => AppState): void => {
     state = updater(state);
     renderControls(state);
   };
 
-  const dropZone = document.querySelector<HTMLDivElement>('#drop-zone');
-  const fileTags = document.querySelector<HTMLDivElement>('#file-tags');
-  const volumeSlider = document.querySelector<HTMLInputElement>('#volume-slider');
-  const trackConfigContainer = document.querySelector<HTMLDivElement>('#track-config-container');
-  const generateButton = document.querySelector<HTMLButtonElement>('#generate-btn');
+  function bindShellListeners() {
+    const dropZone = document.querySelector<HTMLDivElement>('#drop-zone');
+    const fileTags = document.querySelector<HTMLDivElement>('#file-tags');
+    const volumeSlider = document.querySelector<HTMLInputElement>('#volume-slider');
+    const trackConfigContainer = document.querySelector<HTMLDivElement>('#track-config-container');
+    const generateButton = document.querySelector<HTMLButtonElement>('#generate-btn');
 
-  if (!dropZone || !fileTags || !volumeSlider || !trackConfigContainer || !generateButton) {
-    throw new Error('Required UI elements not found');
-  }
+    if (!dropZone || !fileTags || !volumeSlider || !trackConfigContainer || !generateButton) {
+      throw new Error('Required UI elements not found');
+    }
 
-  setupFileUpload({
-    dropZone,
-    fileTags,
-    onValidationError: (message) => {
-      setUploadStatus(`エラー: ${message}`, true);
-    },
-    onFilesChanged: async (files) => {
-      if (files.length === 0) {
-        updateState(() => createInitialAppState());
-        setUploadStatus('', false);
-        return;
-      }
+    setupFileUpload({
+      dropZone,
+      fileTags,
+      onValidationError: (message) => {
+        setUploadStatus(t('upload.status.error', message), true);
+      },
+      onFilesChanged: async (files) => {
+        if (files.length === 0) {
+          updateState(() => createInitialAppState(getLanguage()));
+          setUploadStatus('', false);
+          return;
+        }
 
-      setUploadStatus('MIDIを解析中...', false);
-      try {
-        const { parseMidiFiles } = await import('./core/midi-parser.ts');
-        const buffers = await Promise.all(files.map(async (file) => ({
-          name: file.name,
-          buffer: await file.arrayBuffer(),
-        })));
-        const parsed = parseMidiFiles(buffers);
-        updateState((current) => setParsedMidi(current, parsed));
-        setUploadStatus(`${parsed.tracks.length}トラックを読み込みました`, false);
+        setUploadStatus(t('upload.status.parsing'), false);
+        try {
+          const { parseMidiFiles } = await import('./core/midi-parser.ts');
+          const buffers = await Promise.all(files.map(async (file) => ({
+            name: file.name,
+            buffer: await file.arrayBuffer(),
+          })));
+          const parsed = parseMidiFiles(buffers);
+          updateState((current) => setParsedMidi(current, parsed));
+          setUploadStatus(t('upload.status.parsed', parsed.tracks.length), false);
 
-        // 初回生成ボタン押下時の待ちを減らすため、重い依存を先読みする
-        void Promise.all([
-          import('./core/audio-renderer.ts'),
-          import('./core/mp3-encoder.ts'),
-          import('jszip'),
-        ]);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        setUploadStatus(`エラー: ${message}`, true);
-      }
-    },
-  });
+          // 初回生成ボタン押下時の待ちを減らすため、重い依存を先読みする
+          void Promise.all([
+            import('./core/audio-renderer.ts'),
+            import('./core/mp3-encoder.ts'),
+            import('jszip'),
+          ]);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          setUploadStatus(t('upload.status.error', message), true);
+        }
+      },
+    });
 
   setupVolumeControl({
     slider: volumeSlider,
@@ -103,12 +120,14 @@ function initApp(): void {
     },
   });
 
-  setupDownloadButton({
-    button: generateButton,
-    getState,
-    updateState,
-  });
+    setupDownloadButton({
+      button: generateButton,
+      getState,
+      updateState,
+    });
+  }
 
+  bindShellListeners();
   render();
 }
 

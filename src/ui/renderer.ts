@@ -1,4 +1,5 @@
-import { CHOIR_TYPES, CHOIR_TYPE_LABELS, INSTRUMENT_LABELS, PART_COLORS, PART_ROLES, ROLE_LABELS } from '../core/constants.ts';
+import { CHOIR_TYPES, PART_COLORS, PART_ROLES } from '../core/constants.ts';
+import { t, getLanguage } from '../core/i18n.ts';
 import type { AppState, PartRole } from '../core/types.ts';
 import { renderProgressDisplay } from './components/progress-display.ts';
 
@@ -17,70 +18,84 @@ function roleColor(role: PartRole): string {
   return PART_COLORS[role];
 }
 
-function roleOptionLabel(role: PartRole): string {
-  return ROLE_LABELS[role] ?? role;
-}
 
-function renderRoleOptions(selected: PartRole): string {
-  return PART_ROLES.map((role) => `
-    <option value="${role}" ${role === selected ? 'selected' : ''}>${roleOptionLabel(role)}</option>
-  `).join('');
+
+function renderRoleOptions(currentRole: PartRole): string {
+  return PART_ROLES.map((role) => {
+    const isSelected = role === currentRole ? 'selected' : '';
+    const label = t('role.' + role) || role;
+    return `<option value="${role}" ${isSelected}>${label}</option>`;
+  }).join('');
 }
 
 function renderChoirTypeSelector(state: AppState): string {
-  const options = CHOIR_TYPES.map((type) => `
-    <option value="${type}" ${state.choirType === type ? 'selected' : ''}>${CHOIR_TYPE_LABELS[type]}</option>
-  `).join('');
+  const options = CHOIR_TYPES.map((type) => {
+    const isSelected = type === state.choirType ? 'selected' : '';
+    const label = t('choir.type.' + type);
+    return `<option value="${type}" ${isSelected}>${label}</option>`;
+  }).join('');
+
   return `
     <div class="choir-type">
-      <label class="choir-type__label" for="choir-type-select">合唱編成</label>
-      <select class="select js-choir-type-select" id="choir-type-select">${options}</select>
-      <span class="choir-type__hint">編成を選ぶとパートを自動で割り当てます</span>
+      <label class="choir-type__label" for="choir-type-select">${t('choir.type.label')}</label>
+      <select id="choir-type-select" class="select select--inline js-choir-type-select">
+        ${options}
+      </select>
+      <span class="choir-type__hint">${t('choir.type.hint')}</span>
     </div>
   `;
 }
 
 export function renderAppShell(root: HTMLDivElement): void {
+  const lang = getLanguage();
   root.innerHTML = `
     <header class="header">
-      <h1 class="header__title">Vertere<span class="header__title-ja">（うぇるてーれ）</span></h1>
-      <p class="header__subtitle">MIDI to MP3 Converter — 合唱練習用音源自動生成ツール</p>
+      <div class="header__top">
+        <h1 class="header__title">Vertere<span class="header__title-ja">（うぇるてーれ）</span></h1>
+        <div class="header__lang">
+          <select class="select select--small js-lang-select" aria-label="Language">
+            <option value="ja" ${lang === 'ja' ? 'selected' : ''}>日本語</option>
+            <option value="en" ${lang === 'en' ? 'selected' : ''}>English</option>
+          </select>
+        </div>
+      </div>
+      <p class="header__subtitle">${t('app.subtitle')}</p>
     </header>
 
     <section class="card" id="step-upload">
-      <span class="card__label">Step 1</span>
-      <h2 class="card__title">MIDIファイルをアップロード</h2>
+      <span class="card__label">${t('step1.label')}</span>
+      <h2 class="card__title">${t('step1.title')}</h2>
       <div
         class="drop-zone"
         id="drop-zone"
         role="button"
         tabindex="0"
-        aria-label="MIDIファイルを選択またはドロップ"
+        aria-label="MIDI"
       >
-        <div class="drop-zone__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 16V4" />
-            <path d="M7 9l5-5 5 5" />
-            <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        <div class="drop-zone__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
         </div>
-        <p class="drop-zone__text">ここにMIDIファイルをドラッグ＆ドロップ</p>
-        <p class="drop-zone__hint">または、クリックしてファイルを選択（.mid / .midi）</p>
+        <p class="drop-zone__text">${t('dropzone.text')}</p>
+        <p class="drop-zone__hint">${t('dropzone.hint')}</p>
       </div>
       <div class="file-tags" id="file-tags"></div>
       <p class="drop-zone__hint" id="upload-status" role="status" aria-live="polite"></p>
     </section>
 
     <section class="card card--disabled" id="step-config" aria-hidden="true">
-      <span class="card__label">Step 2</span>
-      <h2 class="card__title">トラック設定</h2>
+      <span class="card__label">${t('step2.label')}</span>
+      <h2 class="card__title">${t('step2.title')}</h2>
       <div id="track-config-container">
         <div class="empty-state">
-          <p>MIDIファイルをアップロードすると、ここに各トラックの楽器やパートの割り当て設定が表示されます。</p>
-        </div>
+        <p>${t('step2.empty')}</p>
+      </div>
       </div>
       <div class="volume-control">
-        <label class="volume-control__label" for="volume-slider">主役以外の音量</label>
+        <label class="volume-control__label" for="volume-slider">${t('volume.label')}</label>
         <input
           type="range"
           id="volume-slider"
@@ -95,13 +110,13 @@ export function renderAppShell(root: HTMLDivElement): void {
     </section>
 
     <section class="card card--disabled" id="step-generate" aria-hidden="true">
-      <span class="card__label">Step 3</span>
-      <h2 class="card__title">生成 & ダウンロード</h2>
+      <span class="card__label">${t('step3.label')}</span>
+      <h2 class="card__title">${t('step3.title')}</h2>
       <button class="btn btn--primary" id="generate-btn" disabled>
-        練習音源を生成
+        ${t('btn.generate')}
       </button>
       <p class="step-hint">
-        ※ブラウザ内で高品質な音声波形を合成・エンコードするため、完了までに数十秒〜数分かかる場合があります。
+        ${t('step3.hint')}
       </p>
       <div class="progress hidden" id="progress-container" role="status" aria-live="polite">
         <div class="progress__bar-container">
@@ -115,8 +130,8 @@ export function renderAppShell(root: HTMLDivElement): void {
     </section>
 
     <footer class="footer">
-      <p>Vertere（うぇるてーれ）- MIDI to MP3 Converter — 合唱練習用音源自動生成ツール</p>
-      <p>すべての処理はブラウザ内で完結します。サーバーへのデータ送信はありません。</p>
+      <p>${t('app.footer1')}</p>
+      <p>${t('app.footer2')}</p>
     </footer>
   `;
 }
@@ -153,14 +168,14 @@ export function renderTrackConfigTable(state: AppState): string {
             ${renderRoleOptions(config.role)}
           </select>
         </td>
-        <td data-label="パート名">
+        <td data-label="${t('table.partName')}">
           ${partNameCell}
         </td>
         <td data-label="Instrument">
           <select class="select js-instrument-select" data-track-id="${track.id}">
-            <option value="clarinet" ${config.instrument === 'clarinet' ? 'selected' : ''}>${INSTRUMENT_LABELS.clarinet}</option>
-            <option value="piano" ${config.instrument === 'piano' ? 'selected' : ''}>${INSTRUMENT_LABELS.piano}</option>
-            <option value="woodblock" ${config.instrument === 'woodblock' ? 'selected' : ''}>${INSTRUMENT_LABELS.woodblock}</option>
+            <option value="clarinet" ${config.instrument === 'clarinet' ? 'selected' : ''}>${t('instrument.clarinet')}</option>
+            <option value="piano" ${config.instrument === 'piano' ? 'selected' : ''}>${t('instrument.piano')}</option>
+            <option value="woodblock" ${config.instrument === 'woodblock' ? 'selected' : ''}>${t('instrument.woodblock')}</option>
           </select>
         </td>
       </tr>
@@ -174,7 +189,7 @@ export function renderTrackConfigTable(state: AppState): string {
           <tr>
             <th scope="col">Track</th>
             <th scope="col">Part</th>
-            <th scope="col">パート名</th>
+            <th scope="col">${t('table.partName')}</th>
             <th scope="col">Instrument</th>
           </tr>
         </thead>
@@ -204,13 +219,13 @@ export function renderControls(state: AppState): void {
     generateBtn.setAttribute('aria-busy', String(isBusy));
     generateBtn.classList.remove('btn--primary', 'btn--success');
     if (isBusy) {
-      generateBtn.textContent = '処理中...';
+      generateBtn.textContent = t('btn.processing');
       generateBtn.classList.add('btn--primary');
     } else if (isDone) {
-      generateBtn.textContent = 'ZIPを再ダウンロード';
+      generateBtn.textContent = t('btn.download');
       generateBtn.classList.add('btn--success');
     } else {
-      generateBtn.textContent = '練習音源を生成';
+      generateBtn.textContent = t('btn.generate');
       generateBtn.classList.add('btn--primary');
     }
   }
@@ -242,7 +257,7 @@ export function renderAppState(state: AppState): void {
   } else {
     trackConfigContainer.innerHTML = `
       <div class="empty-state">
-        <p>MIDIファイルをアップロードすると、ここに各トラックの楽器やパートの割り当て設定が表示されます。</p>
+        <p>${t('step2.empty')}</p>
       </div>
     `;
   }

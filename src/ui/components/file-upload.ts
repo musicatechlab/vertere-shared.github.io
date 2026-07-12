@@ -1,3 +1,4 @@
+import { t } from '../../core/i18n.ts';
 interface FileUploadOptions {
   dropZone: HTMLElement;
   fileTags: HTMLElement;
@@ -15,7 +16,7 @@ function renderTags(container: HTMLElement, files: File[], onRemove: (index: num
   container.innerHTML = files.map((file, index) => `
     <span class="file-tag">
       ${file.name}
-      <button type="button" class="file-tag__remove" data-index="${index}" aria-label="${file.name}を削除">×</button>
+      <button type="button" class="file-tag__remove" data-index="${index}" aria-label="${t('upload.remove', file.name)}">×</button>
     </span>
   `).join('');
 

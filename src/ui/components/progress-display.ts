@@ -1,4 +1,5 @@
-import { PHASE_ICONS, PHASE_LABELS } from '../../core/constants.ts';
+import { PHASE_ICONS } from '../../core/constants.ts';
+import { t } from '../../core/i18n.ts';
 import type { ProgressState } from '../../core/types.ts';
 
 function clampPercent(value: number): number {
@@ -33,19 +34,29 @@ export function renderProgressDisplay(progress: ProgressState): void {
 
   const icon = PHASE_ICONS[progress.phase] ?? '';
   const prefix = icon ? `${icon} ` : '';
-  const phaseLabel = PHASE_LABELS[progress.phase] ?? progress.phase;
-  const partName = progress.currentPartName || '処理';
-  const totalParts = Math.max(progress.totalParts, 0);
-  const partIndexText = totalParts > 0 ? ` (${progress.currentPartIndex + 1}/${totalParts})` : '';
+  const phaseLabel = t('phase.' + progress.phase);
   const overallPercent = computeOverallPercent(progress);
 
-  if (progress.phase === 'done') {
-    label.textContent = `${prefix}すべてのパート生成が完了しました`;
-  } else if (progress.phase === 'error' && progress.errorMessage) {
-    label.textContent = `${prefix}エラー: ${progress.errorMessage}`;
-  } else {
-    label.textContent = `${prefix}${partName} を${phaseLabel}...${partIndexText}`;
+  let statusText = '';
+  if (progress.errorMessage) {
+    statusText = t('progress.status.error', progress.errorMessage);
+  } else if (progress.phase !== 'idle' && progress.phase !== 'done') {
+    if (progress.currentPartName === 'All') {
+      statusText = t('progress.status.all', phaseLabel);
+    } else {
+      const currentPartIndexStr = String(progress.currentPartIndex + 1);
+      const totalPartsStr = String(progress.totalParts);
+      statusText = t('progress.status', progress.currentPartName || 'Part', phaseLabel, currentPartIndexStr, totalPartsStr);
+    }
   }
+
+  if (progress.phase === 'zipping') {
+    statusText = phaseLabel;
+  } else if (progress.phase === 'done') {
+    statusText = t('phase.done');
+  }
+
+  label.textContent = `${prefix}${statusText}`;
 
   percent.textContent = `${overallPercent}%`;
   bar.style.transform = `scaleX(${overallPercent / 100})`;

@@ -6,20 +6,28 @@ import {
 } from '../core/constants.ts';
 import { assignParts, renumberByRole } from '../core/part-assignment.ts';
 import type { AppState, ChoirType, GeneratedPart, ParsedMidi, ProgressState, TrackConfig } from '../core/types.ts';
+import type { Language } from '../core/i18n.ts';
+
+export const INITIAL_APP_STATE: AppState = {
+  language: 'ja',
+  parsedMidi: null,
+  choirType: DEFAULT_CHOIR_TYPE,
+  trackConfigs: [],
+  backgroundVolumePercent: DEFAULT_BACKGROUND_VOLUME,
+  progress: { ...INITIAL_PROGRESS },
+  generatedParts: [],
+};
 
 export function createDefaultTrackConfigs(parsedMidi: ParsedMidi, choirType: ChoirType = DEFAULT_CHOIR_TYPE): TrackConfig[] {
   return assignParts(parsedMidi.tracks, choirType);
 }
 
-export function createInitialAppState(): AppState {
-  return {
-    parsedMidi: null,
-    choirType: DEFAULT_CHOIR_TYPE,
-    trackConfigs: [],
-    backgroundVolumePercent: DEFAULT_BACKGROUND_VOLUME,
-    progress: { ...INITIAL_PROGRESS },
-    generatedParts: [],
-  };
+export function createInitialAppState(language: Language = 'ja'): AppState {
+  return { ...INITIAL_APP_STATE, language };
+}
+
+export function setLanguage(state: AppState, language: Language): AppState {
+  return { ...state, language };
 }
 
 export function setParsedMidi(state: AppState, parsedMidi: ParsedMidi): AppState {
